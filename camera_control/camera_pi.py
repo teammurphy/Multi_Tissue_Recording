@@ -28,15 +28,16 @@ import time
 import io
 import threading
 import picamera
-from flask import Response
 
+global camera
 camera = picamera.PiCamera()
 
 
-def gen(camera):
+def gen(camer):
 	while True:
-		frame = camera.get_frame()
-		yield b'==frame\n' b'Content-Type: image/jpeg\n' + frame + b'\n'
+		frame = camer.get_frame()
+		yield (b'--frame\r\n'
+			   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
 
 # camera.resolution=(1280, 720)
@@ -93,9 +94,9 @@ class Camera(object):
 				break
 		cls.thread = None
 
-	def rec(self, time, date, bio):
+	def rec(time, date, bio):
 		global camera
-		camera.start_recording('/home/pi/{2}_frew_{0}_{1}_.h264'.format(
+		camera.start_recording('/home/pi/{1}_frew_{0}_{1}_.h264'.format(
 			bio, date))
 		camera.wait_recording(time)
 		camera.stop_recording()
