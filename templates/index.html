@@ -1,0 +1,31 @@
+<html>
+
+<head>
+    <title> Jacks Stream </title>
+</head>
+
+<body>
+    <h1> Live Streaming </h1>
+    <form method="POST">
+        <p> Select which postys are in use </p>
+        <input type="date" name="dater">
+        <input type="checkbox" name="posts" value="1">
+        <input type="checkbox" name="posts" value="2">
+        <input type="checkbox" name="posts" value="3">
+        <input type="checkbox" name="posts" value="4">
+        <input type="checkbox" name="posts" value="5">
+        <input type="checkbox" name="posts" value="6">
+        <input type="number" name="bio" value="1">
+        <input type="submit">
+    </form>
+    <p> {{ posts }} </p>
+    <h3><img src="{{ url_for("feed") }}" width="50%"></h3>
+    <a href="/GoingUp"><input type="button" value="Zoom Up"></a> <a href="/GoingDown"><input type="button" value="Zoom Down"></a>
+    <a href="/Record"><input type="button" value="Record 10 second Video"></a>
+    <a href="/Upload"><input type="button" value="Upload Video to Jupyter"></a>
+    <p> {{ temp }} </p>
+    <hr>
+    <p> @2020 Jack </p>
+</body>
+
+</html>
