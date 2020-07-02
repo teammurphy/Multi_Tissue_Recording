@@ -29,8 +29,6 @@ import io
 import threading
 import picamera
 
-global camera
-camera = picamera.PiCamera()
 
 
 def gen(camer):
@@ -42,6 +40,8 @@ def gen(camer):
 
 # camera.resolution=(1280, 720)
 class Camera(object):
+	global camera
+	camera = picamera.PiCamera()
 	thread = None  # background thread that reads frames from camera
 	frame = None  # current frame is stored here by background thread
 	last_access = 0  # time of last client access to the camera
