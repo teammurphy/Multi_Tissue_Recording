@@ -17,11 +17,10 @@ def index():
 
 @app.route('/', methods=['POST'])
 def index_post():
-    global slots, bio, date
+    global bio, date
     posts = request.form.getlist('posts')
     bio = request.form['bio']
     date = request.form['dater']
-    slots = posts
     return render_template("index.html", posts=posts)
 
 
@@ -31,13 +30,21 @@ def feed():
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
+@app.route('/stageup')
+def stage_up():
+    return redirect('/')
+
+
+@app.route('/stagedown')
+def stage_down():
+    return redirect('/')
+
 @app.route('/focusup')
 def focus_up():
     global temp_val
     if temp_val < 1000:
         temp_val += 10
-    else:
-        temp_val = temp_val
+
     value = (temp_val << 4) & 0x3ff0
     dat1 = (value >> 8) & 0x3f
     dat2 = value & 0xf0
@@ -61,7 +68,7 @@ def focus_down():
 @app.route('/record')
 def record():
     Camera.rec(10, date, bio)
-    return render_template("index.html")
+    return redirect('/')
 
 
 @app.route('/upload')
@@ -69,7 +76,7 @@ def upload():
     os.system(
         "scp ../videotrial.h264 root@134.122.113.166:../home/jupyter-jack/scratch/Videos"
     )
-    return render_template("index.html")
+    return redirect('/')
 
 
 if __name__ == '__main__':
