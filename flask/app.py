@@ -1,10 +1,10 @@
 import logging
 import os
 
-#import camera_control.camera_pi as cams
+import camera_control.camera_pi as cams
 import forms
 import models
-#from camera_control.camera_pi import Camera
+from camera_control.camera_pi import Camera
 from flask import Flask, Response, redirect, render_template, request
 
 logging.basicConfig(filename='app.log',
@@ -15,8 +15,14 @@ logging.warning("New Run Starts Here")
 def create_app():
     # TODO: move to wsgi??
     app = Flask(__name__)
+    # TODO: change this to where the databse is
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://newuser:newpassword@206.189.235.43:3306/test_db'
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    # Shows sql querys being made if having database issue set to true
+    app.config['SQLALCHEMY_ECHO'] = False
     #  REVIEW: : this needs to be changed
     app.secret_key = 'development key'
+    models.db.init_app(app)
 
     return app
 
@@ -44,14 +50,23 @@ def get_post_info(wtforms_list):
     return count, li
 
 
-'''
-@app.route('/')
-def index():
-    global temp_val
-    form = forms.upload_to_b_form()
+def add_tissues(li_of_post_info, experiment_num_passed, bio_reactor_num_passed, video_id_passed):
+    # from flask multi tissue tracking
+    for post, info in enumerate(li_of_post_info):
 
-    return render_template('index.html', temp=str(temp_val), form=form)
-'''
+        '''
+        enumerate and post is used beacuse the location on the item in the list
+        if not 'empty' is the number of the post it is on whie info is the metadata about the tissue
+        '''
+        # check is there is a tissue on post
+        if info != 'empty':
+            logging.info(info)
+            # splits so tissue num is in [0] and type in [1]
+            split_list = info.split(',')
+            tissue_num = split_list[0]
+            tissue_type = split_list[1]
+            models.insert_tissue_sample(
+                tissue_num, tissue_type, experiment_num_passed, bio_reactor_num_passed, post, video_id_passed)
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -61,9 +76,14 @@ def index_post():
         # TODO: add form validation
         # REVIEW: delete gloabl???
         global bio, date
-        # is a list of info about tissue 'empty' if string not in use
-        # 'tissue_number,tissue_type' if it is in use
-        li_of_post_info = get_post_info(form.post.entries)
+        #  # from flask multi tissue tracking
+        '''
+        is a list of info about tissue 'empty' if string not in use
+        'tissue_number,tissue_type' if it is in use
+        tup[0] is count of tissues tup[1] is list of tiisue infor
+         '''
+        tup = get_post_info(form.post.entries)
+        li_of_post_info = tup[1]
         logging.info(li_of_post_info)
 
         # REVIEW: ideally would like to make these drop downs for experminet and bio reactor
@@ -80,9 +100,14 @@ def index_post():
         if models.get_bio_reactor(bio_reactor_num) is None:
             models.insert_bio_reactor(bio_reactor_num)
 
+        new_video_id = 1
         # add the tissues to the databse as children of the vid, experiment and bio reactor
         add_tissues(li_of_post_info, experiment_num,
                     bio_reactor_num, new_video_id)
+        return'''
+        <h1>check database</h1>
+        '''
+
     else:
         return render_template("index.html", form=form)
 
