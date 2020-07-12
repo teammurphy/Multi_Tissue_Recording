@@ -24,82 +24,81 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
 
-'''
-import time
+
 import io
 import threading
+import time
+
 import picamera
 
 
-
 def gen(camer):
-	while True:
-		frame = camer.get_frame()
-		yield (b'--frame\r\n'
-			   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+    while True:
+        frame = camer.get_frame()
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
 
 # camera.resolution=(1280, 720)
 class Camera(object):
-	global camera
-	camera = picamera.PiCamera()
-	thread = None  # background thread that reads frames from camera
-	frame = None  # current frame is stored here by background thread
-	last_access = 0  # time of last client access to the camera
+    global camera
+    camera = picamera.PiCamera()
+    thread = None  # background thread that reads frames from camera
+    frame = None  # current frame is stored here by background thread
+    last_access = 0  # time of last client access to the camera
 
-	# camera = picamera.PiCamera()
-	def initialize(self):
-		if Camera.thread is None:
-			# start background frame thread
-			Camera.thread = threading.Thread(target=self._thread)
-			Camera.thread.start()
+    # camera = picamera.PiCamera()
+    def initialize(self):
+        if Camera.thread is None:
+            # start background frame thread
+            Camera.thread = threading.Thread(target=self._thread)
+            Camera.thread.start()
 
-			# wait until frames start to be available
-			while self.frame is None:
-				time.sleep(0)
+            # wait until frames start to be available
+            while self.frame is None:
+                time.sleep(0)
 
-	def get_frame(self):
-		Camera.last_access = time.time()
-		self.initialize()
-		return self.frame
+    def get_frame(self):
+        Camera.last_access = time.time()
+        self.initialize()
+        return self.frame
 
-	@classmethod
-	def _thread(cls):
-		global camera
-		# with picamera.PiCamera() as camera:
-		# camera setup
-		# camera.resolution = (320, 240)
-		# camera.hflip = True
-		# camera.vflip = True
+    @classmethod
+    def _thread(cls):
+        global camera
+        # with picamera.PiCamera() as camera:
+        # camera setup
+        # camera.resolution = (320, 240)
+        # camera.hflip = True
+        # camera.vflip = True
 
-		# let camera warm up
-		camera.start_preview()
-		time.sleep(2)
+        # let camera warm up
+        camera.start_preview()
+        time.sleep(2)
 
-		stream = io.BytesIO()
-		for foo in camera.capture_continuous(stream,
-											 'jpeg',
-											 use_video_port=True):
+        stream = io.BytesIO()
+        for foo in camera.capture_continuous(stream,
+                                             'jpeg',
+                                             use_video_port=True):
 
-			# camera.capture_continuous(stream, 'jpeg', use_video_port=True)# store frame
-			stream.seek(0)
-			cls.frame = stream.read()
+            # camera.capture_continuous(stream, 'jpeg', use_video_port=True)# store frame
+            stream.seek(0)
+            cls.frame = stream.read()
 
-			# reset stream for next frame
-			stream.seek(0)
-			stream.truncate()
+            # reset stream for next frame
+            stream.seek(0)
+            stream.truncate()
 
-			# if there hasn't been any clients asking for frames in
-			# the last 10 seconds stop the thread
-			if time.time() - cls.last_access > 10:
-				break
-		cls.thread = None
+            # if there hasn't been any clients asking for frames in
+            # the last 10 seconds stop the thread
+            if time.time() - cls.last_access > 10:
+                break
+        cls.thread = None
 
-	def rec(time, date, bio):
-		global camera
-		camera.start_recording('/home/pi/{1}_frew_{0}_{1}_.h264'.format(
-			bio, date))
-		camera.wait_recording(time)
-		camera.stop_recording()
-		return
-'''
+    def rec(time, date, bio):
+        global camera
+        camera.start_recording('/home/pi/{1}_frew_{0}_{1}_.h264'.format(
+            bio, date))
+        camera.wait_recording(time)
+        camera.stop_recording()
+        return
