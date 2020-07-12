@@ -24,6 +24,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
 
+'''
 import time
 import io
 import threading
@@ -101,3 +102,4 @@ class Camera(object):
 		camera.wait_recording(time)
 		camera.stop_recording()
 		return
+'''
