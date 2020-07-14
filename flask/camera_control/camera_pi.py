@@ -28,7 +28,7 @@ SOFTWARE.
 import io
 import threading
 import time
-
+import os
 import picamera
 
 
@@ -95,10 +95,15 @@ class Camera(object):
                 break
         cls.thread = None
 
-    def rec(time, date, bio):
+    def rec(time, path_to_file):
         global camera
-        camera.start_recording('/home/pi/{1}_frew_{0}_{1}_.h264'.format(
-            bio, date))
+        print('psp')
+        print(path_to_file)
+        dirpath = path_to_file.split('/')[:-1]
+        dirpath = '/'.join(dirpath)
+        if not os.path.exists(dirpath):
+            os.makedirs(dirpath)
+        camera.start_recording(path_to_file)
         camera.wait_recording(time)
         camera.stop_recording()
         return
