@@ -16,7 +16,7 @@ def create_app():
     # TODO: move to wsgi??
     app = Flask(__name__)
     # TODO: change this to where the databse is
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://newuser:newpassword@206.189.235.43:3306/test_db'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://newuser:newpassword@192.81.216.242:3306/test_db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     # Shows sql querys being made if having database issue set to true
     app.config['SQLALCHEMY_ECHO'] = False
@@ -68,6 +68,15 @@ def add_tissues(li_of_post_info, experiment_num_passed, bio_reactor_num_passed, 
             models.insert_tissue_sample(
                 tissue_num, tissue_type, experiment_num_passed, bio_reactor_num_passed, post, video_id_passed)
 
+def save_video(path_to_file):
+    filename = path_to_file.split('/')[-1]
+    dirpath = path_to_file.split('/')[:-1]
+    dirpath = '/'.join(dirpath)
+    if not os.path.exists(dirpath):
+        os.makedirs(dirpath)
+
+
+
 
 @app.route('/', methods=['GET', 'POST'])
 def index_post():
@@ -100,7 +109,13 @@ def index_post():
         if models.get_bio_reactor(bio_reactor_num) is None:
             models.insert_bio_reactor(bio_reactor_num)
 
+        date_string = form.date_recorded.data.strftime('%m_%d_%Y')
+        vid_name = date_string + "_" + "Freq" + str(form.frequency.data) + "_" + "Bio" + str(bio_reactor_num) + ".h264"
         new_video_id = 1
+        path_to_file = 'static/uploads/{0}/{1}/videoFiles/{2}'.format(experiment_num, date_string, vid_name)
+        new_video_id = models.insert_video(form.date_recorded.data, experiment_num, bio_reactor_num, form.frequency.data, path_to_file)
+        #save_video(path_to_file)
+        Camera.rec(10, path_to_file)
         # add the tissues to the databse as children of the vid, experiment and bio reactor
         add_tissues(li_of_post_info, experiment_num,
                     bio_reactor_num, new_video_id)
@@ -163,8 +178,9 @@ def record():
 @app.route('/upload')
 def upload():
     os.system(
-        "scp ../videotrial.h264 root@134.122.113.166:../home/jupyter-jack/scratch/Videos"
+        "rsync -a --ignore-existing static/uploads/ 157.230.10.236:~/uploader/"
     )
+	# "scp ../videotrial.h264 root@134.122.113.166:../home/jupyter-jack/scratch/Videos"
     return redirect('/')
 
 
