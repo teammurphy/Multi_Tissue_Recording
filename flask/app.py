@@ -11,12 +11,13 @@ logging.basicConfig(filename='app.log',
                     format='[%(filename)s:%(lineno)d] %(message)s', level=logging.DEBUG)
 logging.warning("New Run Starts Here")
 
+ip_of_host = '159.89.84.193'
 
 def create_app():
     # TODO: move to wsgi??
     app = Flask(__name__)
     # TODO: change this to where the databse is
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://newuser:newpassword@192.81.216.242:3306/test_db'
+    app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://newuser:newpassword@{ip_of_host}:3306/test_db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     # Shows sql querys being made if having database issue set to true
     app.config['SQLALCHEMY_ECHO'] = False
@@ -31,9 +32,6 @@ app = create_app()
 
 
 temp_val = 512
-date = None
-bio = None
-
 
 def get_post_info(wtforms_list):
     # from flask multi tissue tracking
@@ -68,24 +66,12 @@ def add_tissues(li_of_post_info, experiment_num_passed, bio_reactor_num_passed, 
             models.insert_tissue_sample(
                 tissue_num, tissue_type, experiment_num_passed, bio_reactor_num_passed, post, video_id_passed)
 
-def save_video(path_to_file):
-    filename = path_to_file.split('/')[-1]
-    dirpath = path_to_file.split('/')[:-1]
-    dirpath = '/'.join(dirpath)
-    if not os.path.exists(dirpath):
-        os.makedirs(dirpath)
-
-
-
 
 @app.route('/', methods=['GET', 'POST'])
 def index_post():
     form = forms.upload_to_b_form()
     if request.method == 'POST':
         # TODO: add form validation
-        # REVIEW: delete gloabl???
-        global bio, date
-        #  # from flask multi tissue tracking
         '''
         is a list of info about tissue 'empty' if string not in use
         'tissue_number,tissue_type' if it is in use
@@ -111,14 +97,11 @@ def index_post():
 
         date_string = form.date_recorded.data.strftime('%m_%d_%Y')
         vid_name = date_string + "_" + "Freq" + str(form.frequency.data) + "_" + "Bio" + str(bio_reactor_num) + ".h264"
-        new_video_id = 1
-        path_to_file = 'static/uploads/{0}/{1}/videoFiles/{2}'.format(experiment_num, date_string, vid_name)
+        path_to_file = f'static/uploads/{experiment_num}/{date_string}/videoFiles/{vid_name}'
         new_video_id = models.insert_video(form.date_recorded.data, experiment_num, bio_reactor_num, form.frequency.data, path_to_file)
-        #save_video(path_to_file)
         Camera.rec(10, path_to_file)
         # add the tissues to the databse as children of the vid, experiment and bio reactor
-        add_tissues(li_of_post_info, experiment_num,
-                    bio_reactor_num, new_video_id)
+        add_tissues(li_of_post_info, experiment_num, bio_reactor_num, new_video_id)
         return'''
         <h1>check database</h1>
         '''
@@ -169,16 +152,10 @@ def focus_down():
     return redirect('/')
 
 
-@app.route('/record')
-def record():
-    Camera.rec(10, date, bio)
-    return redirect('/')
-
-
 @app.route('/upload')
 def upload():
     os.system(
-        "rsync -a --ignore-existing static/uploads/ 157.230.10.236:~/uploader/"
+        f'rsync -a --ignore-existing static/uploads/ {ip_of_host}:~/uploader/'
     )
 	# "scp ../videotrial.h264 root@134.122.113.166:../home/jupyter-jack/scratch/Videos"
     return redirect('/')
