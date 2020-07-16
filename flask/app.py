@@ -11,12 +11,13 @@ logging.basicConfig(filename='app.log',
                     format='[%(filename)s:%(lineno)d] %(message)s', level=logging.DEBUG)
 logging.warning("New Run Starts Here")
 
+ip_of_host = '159.89.84.193'
 
 def create_app():
     # TODO: move to wsgi??
     app = Flask(__name__)
     # TODO: change this to where the databse is
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://newuser:newpassword@192.81.216.242:3306/test_db'
+    app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://newuser:newpassword@{ip_of_host}:3306/test_db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     # Shows sql querys being made if having database issue set to true
     app.config['SQLALCHEMY_ECHO'] = False
@@ -31,9 +32,6 @@ app = create_app()
 
 
 temp_val = 512
-date = None
-bio = None
-ip_of_host = '159.89.84.193'
 
 def get_post_info(wtforms_list):
     # from flask multi tissue tracking
@@ -74,9 +72,6 @@ def index_post():
     form = forms.upload_to_b_form()
     if request.method == 'POST':
         # TODO: add form validation
-        # REVIEW: delete gloabl???
-        global bio, date
-        #  # from flask multi tissue tracking
         '''
         is a list of info about tissue 'empty' if string not in use
         'tissue_number,tissue_type' if it is in use
@@ -154,12 +149,6 @@ def focus_down():
     dat1 = (value >> 8) & 0x3f
     dat2 = value & 0xf0
     os.system("i2cset -y 0 0x0c %d %d" % (dat1, dat2))
-    return redirect('/')
-
-
-@app.route('/record')
-def record():
-    Camera.rec(10, date, bio)
     return redirect('/')
 
 
