@@ -12,7 +12,7 @@ logging.basicConfig(filename='app.log',
 logging.warning("New Run Starts Here")
 
 ip_of_host = '159.89.84.193'
-
+os.system(f"ssh-keygen -H {ip_of_host} >> ~/.ssh/known_hosts")
 def create_app():
     # TODO: move to wsgi??
     app = Flask(__name__)
@@ -65,6 +65,7 @@ def add_tissues(li_of_post_info, experiment_num_passed, bio_reactor_num_passed, 
             tissue_type = split_list[1]
             models.insert_tissue_sample(
                 tissue_num, tissue_type, post, video_id_passed)
+
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -154,9 +155,8 @@ def focus_down():
 
 @app.route('/upload')
 def upload():
-    os.system(
-        f'rsync -a --ignore-existing static/uploads/ {ip_of_host}:~/uploader/'
-    )
+
+    os.system(f'rsync -a --ignore-existing static/uploads/ {ip_of_host}:~/uploader/')
 	# "scp ../videotrial.h264 root@134.122.113.166:../home/jupyter-jack/scratch/Videos"
     return redirect('/')
 
