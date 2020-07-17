@@ -104,7 +104,7 @@ def insert_tissue_sample(tissue_number_passed, tissue_type_passed, post_passed, 
     db.session.add(new_tissue)
     db.session.commit()
 
-
+# TODO: Delete this function I think
 def insert_tissue_sample_csv(tissue_number_passed, tissue_type_passed, experiment_num_passed, bio_reactor_num_passed, post_passed, video_id_passed, csv_passed):
     new_tissue = Tissue(
         tissue_number=tissue_number_passed, tissue_type=tissue_type_passed, post=post_passed, experiment_num=experiment_num_passed, video_id=video_id_passed, bio_reactor_num=bio_reactor_num_passed, csv_path=csv_passed)
