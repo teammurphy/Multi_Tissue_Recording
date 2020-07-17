@@ -6,6 +6,13 @@
 
 <body>
   <h1> Live Streaming </h1>
+
+  <h3><img src="{{ url_for("feed") }}" width="50%"></h3>
+  <a href="/focusup"><input type="button" value="Focus Up"></a>
+  <a href="/focusdown"><input type="button" value="Focus Down"></a>
+  <a href="/stageup"><input type="button" value="Stage Up (Not Working Yet)"></a>
+  <a href="/stagedown"><input type="button" value="Stage Down (Not Working Yet)"></a>
+  <a href="/upload"><input type="button" value="Upload uploads folder"></a>
   <form method=post action="" enctype="multipart/form-data">
     <fieldset>
 
@@ -38,14 +45,6 @@
 
     </fieldset>
   </form>
-  <p> {{ posts }} </p>
-  <h3><img src="{{ url_for("feed") }}" width="50%"></h3>
-  <a href="/focusup"><input type="button" value="Focus Up"></a>
-  <a href="/focusdown"><input type="button" value="Focus Down"></a>
-  <a href="/stageup"><input type="button" value="Stage Up (Not Working Yet)"></a>
-  <a href="/stagedown"><input type="button" value="Stage Down (Not Working Yet)"></a>
-  <a href="/upload"><input type="button" value="Upload uploads folder"></a>
-  <p> {{ temp }} </p>
   <hr>
   <p> @2020 Jack </p>
 </body>
