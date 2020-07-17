@@ -14,12 +14,13 @@ tz = timezone('EST')
 # TODO: what hnappens when get fails check that work flow
 
 
+
 class Experiment(db.Model):
     experiment_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     experiment_num = db.Column(
         db.Integer, nullable=False, unique=True)
-    tissues = db.relationship('Tissue', back_populates='experiment')
-    vids = db.relationship('Video', back_populates='experiment')
+    vids = db.relationship(
+        'Video', back_populates='experiment', passive_deletes=True)
 
 
 class Video(db.Model):
@@ -34,14 +35,16 @@ class Video(db.Model):
     save_location = db.Column(db.String(120), nullable=False)
 
     experiment_num = db.Column(db.Integer, db.ForeignKey(
-        'experiment.experiment_num'), nullable=False)
+        'experiment.experiment_num', ondelete='CASCADE'), nullable=False)
     experiment = db.relationship('Experiment', back_populates='vids')
 
     bio_reactor_num = db.Column(db.Integer, db.ForeignKey(
-        'bio_reactor.bio_reactor_num'), nullable=False)
-    bio_reactor = db.relationship('Bio_reactor', back_populates='vids')
+        'bio_reactor.bio_reactor_num', ondelete='CASCADE'), nullable=False)
+    bio_reactor = db.relationship(
+        'Bio_reactor', back_populates='vids')
 
-    tissues = db.relationship('Tissue', back_populates='video')
+    tissues = db.relationship(
+        'Tissue', back_populates='video', passive_deletes=True)
 
 
 class Tissue(db.Model):
@@ -52,20 +55,13 @@ class Tissue(db.Model):
     post = db.Column(db.Integer, nullable=False)
     csv_path = db.Column(db.String(120), nullable=True)
 
-    experiment_num = db.Column(db.Integer, db.ForeignKey(
-        'experiment.experiment_num'), nullable=False)
-    experiment = db.relationship('Experiment', back_populates='tissues')
-
-    bio_reactor_num = db.Column(db.Integer,  db.ForeignKey(
-        'bio_reactor.bio_reactor_num'), nullable=False)
-    bio_reactor = db.relationship('Bio_reactor', back_populates='tissues')
-
     video_id = db.Column(
-        db.Integer,  db.ForeignKey('video.video_id'), nullable=False)
-    video = db.relationship('Video', back_populates='tissues')
+        db.Integer,  db.ForeignKey('video.video_id', ondelete='CASCADE'), nullable=False)
+    video = db.relationship(
+        'Video', back_populates='tissues')
 
     def __repr__(self):
-        return '<Tissue %r>' % self.id
+        return '<Tissue %r>' % self.tissue_id
 
 # TODO: video and csv separe or not
 
@@ -74,11 +70,13 @@ class Bio_reactor(db.Model):
     bio_reactor_id = db.Column(
         db.Integer, primary_key=True, autoincrement=True)
     bio_reactor_num = db.Column(db.Integer, unique=True, nullable=False)
-    tissues = db.relationship('Tissue', back_populates='bio_reactor')
-    vids = db.relationship('Video', back_populates='bio_reactor')
+    vids = db.relationship(
+        'Video', back_populates='bio_reactor', passive_deletes=True)
     # TODO:put actual stuff here
 
 # TODO: what happens if already exsits?
+
+
 
 
 def insert_experiment(num_passed):
@@ -99,16 +97,14 @@ def insert_video(date_recorded_passed, experiment_num_passed, bio_reactor_num_pa
     return new_video.video_id
 
 
-def insert_tissue_sample(tissue_number_passed, tissue_type_passed, experiment_num_passed, bio_reactor_num_passed, post_passed, video_id_passed):
+def insert_tissue_sample(tissue_number_passed, tissue_type_passed, post_passed, video_id_passed):
     new_tissue = Tissue(
-        tissue_number=tissue_number_passed, tissue_type=tissue_type_passed, post=post_passed, experiment_num=experiment_num_passed, video_id=video_id_passed, bio_reactor_num=bio_reactor_num_passed)
-    new_tissue.experiment = get_experiment(experiment_num_passed)
-    new_tissue.bio_reactor = get_bio_reactor(bio_reactor_num_passed)
+        tissue_number=tissue_number_passed, tissue_type=tissue_type_passed, post=post_passed, video_id=video_id_passed)
     new_tissue.video = get_video(video_id_passed)
     db.session.add(new_tissue)
     db.session.commit()
 
-
+# TODO: Delete this function I think
 def insert_tissue_sample_csv(tissue_number_passed, tissue_type_passed, experiment_num_passed, bio_reactor_num_passed, post_passed, video_id_passed, csv_passed):
     new_tissue = Tissue(
         tissue_number=tissue_number_passed, tissue_type=tissue_type_passed, post=post_passed, experiment_num=experiment_num_passed, video_id=video_id_passed, bio_reactor_num=bio_reactor_num_passed, csv_path=csv_passed)

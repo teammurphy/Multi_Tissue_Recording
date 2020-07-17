@@ -64,7 +64,7 @@ def add_tissues(li_of_post_info, experiment_num_passed, bio_reactor_num_passed, 
             tissue_num = split_list[0]
             tissue_type = split_list[1]
             models.insert_tissue_sample(
-                tissue_num, tissue_type, experiment_num_passed, bio_reactor_num_passed, post, video_id_passed)
+                tissue_num, tissue_type, post, video_id_passed)
 
 
 @app.route('/', methods=['GET', 'POST'])
