@@ -68,10 +68,12 @@ def add_tissues(li_of_post_info, experiment_num_passed, bio_reactor_num_passed, 
 
 @app.route('/ssh', methods=["GET", "POST"])
 def ssh_path():
-    global ip_of_host
+    global ip_of_host, app
     if request.method == "POST":
         ip_of_host = request.form.get("ip")
-    return render_template('ssh.html', currssh = ip_of_host)
+        app = create_app()
+        os.system(f"ssh-keygen -H {ip_of_host} >> ~/.ssh/known_hosts")
+    return render_template('ssh.html', currssh=ip_of_host)
 
 @app.route('/', methods=['GET', 'POST'])
 def index_post():
