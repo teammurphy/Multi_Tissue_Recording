@@ -66,14 +66,7 @@ def add_tissues(li_of_post_info, experiment_num_passed, bio_reactor_num_passed, 
             models.insert_tissue_sample(
                 tissue_num, tissue_type, post, video_id_passed)
 
-@app.route('/ssh', methods=["GET", "POST"])
-def ssh_path():
-    global ip_of_host, app
-    if request.method == "POST":
-        ip_of_host = request.form.get("ip")
-        app = create_app()
-        os.system(f"ssh-keygen -H {ip_of_host} >> ~/.ssh/known_hosts")
-    return render_template('ssh.html', currssh=ip_of_host)
+
 
 @app.route('/', methods=['GET', 'POST'])
 def index_post():
@@ -162,9 +155,8 @@ def focus_down():
 
 @app.route('/upload')
 def upload():
-    os.system(
-        f'rsync -a --ignore-existing static/uploads/ {ip_of_host}:~/uploader/'
-    )
+    os.system(f"ssh-keygen -H {ip_of_host} >> ~/.ssh/known_hosts")
+    os.system(f'rsync -a --ignore-existing static/uploads/ {ip_of_host}:~/uploader/')
 	# "scp ../videotrial.h264 root@134.122.113.166:../home/jupyter-jack/scratch/Videos"
     return redirect('/')
 
