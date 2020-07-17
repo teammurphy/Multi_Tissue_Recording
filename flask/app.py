@@ -12,7 +12,7 @@ logging.basicConfig(filename='app.log',
 logging.warning("New Run Starts Here")
 
 ip_of_host = '159.89.84.193'
-
+os.system(f"ssh-keygen -H {ip_of_host} >> ~/.ssh/known_hosts")
 def create_app():
     # TODO: move to wsgi??
     app = Flask(__name__)
@@ -155,7 +155,7 @@ def focus_down():
 
 @app.route('/upload')
 def upload():
-    os.system(f"ssh-keygen -H {ip_of_host} >> ~/.ssh/known_hosts")
+
     os.system(f'rsync -a --ignore-existing static/uploads/ {ip_of_host}:~/uploader/')
 	# "scp ../videotrial.h264 root@134.122.113.166:../home/jupyter-jack/scratch/Videos"
     return redirect('/')
