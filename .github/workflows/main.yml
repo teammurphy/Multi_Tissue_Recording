@@ -1,0 +1,20 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  sync:
+    name: Sync
+    runs-on: ubuntu-latest
+    steps:
+      - uses: adrianjost/files-sync-action@master
+        with:
+          FILE_PATTERNS: |
+            ^flask/models.py$
+          TARGET_REPOS: |
+            teammurphy/test1
+          GITHUB_TOKEN: ${{ secrets.SYNC_TOKEN }}  
