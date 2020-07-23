@@ -1,4 +1,4 @@
-name: CI
+name: sync_models
 
 on:
   push:
@@ -16,5 +16,5 @@ jobs:
           FILE_PATTERNS: |
             ^flask/models.py$
           TARGET_REPOS: |
-            teammurphy/test1
+            teammurphy/Multi_Tissue_Recording
           GITHUB_TOKEN: ${{ secrets.SYNC_TOKEN }}  
