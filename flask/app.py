@@ -87,13 +87,13 @@ def index_post():
         # checks if experiment exsits if it does makes it
         experiment_num = form.experiment_num.data
         logging.info(experiment_num)
-        if models.get_experiment(experiment_num) is None:
+        if models.get_experiment_by_num(experiment_num) is None:
             models.insert_experiment(experiment_num)
 
             # checks if experiment exsits if it does makes it
         bio_reactor_num = form.bio_reactor_num.data
         logging.info(bio_reactor_num)
-        if models.get_bio_reactor(bio_reactor_num) is None:
+        if models.get_bio_reactor_by_num(bio_reactor_num) is None:
             models.insert_bio_reactor(bio_reactor_num)
 
         date_string = form.date_recorded.data.strftime('%m_%d_%Y')
