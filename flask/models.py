@@ -34,7 +34,11 @@ class Video(db.Model):
 
     save_location = db.Column(db.String(120), nullable=False)
 
-    cal_dist_pix = db.Column(db.Float, nullable=True)
+    # calibration distance is the user inputed length in mm of marker used to calibrate
+    calibration_distance = db.Column(db.Float, nullable=True)
+
+    # calibration factor is the calibration distance / length if the drawn calibration line in pixels
+    calibration_factor = db.Column(db.Float, nullable=True)
 
     experiment_num = db.Column(db.Integer, db.ForeignKey(
         'experiment.experiment_num', ondelete='CASCADE'), nullable=False)
@@ -188,13 +192,24 @@ def add_tissue_csv(id_passed, path_passed):
     db.session.commit()
 
 
-def add_cal_distance(id_passed, cal_dist_pix_passed):
+def add_calibration_distance(id_passed, cal_dist):
     video = get_video(id_passed)
-    video.cal_dist_pix = cal_dist_pix_passed
+    video.calibration_distance = cal_dist
+    db.session.commit()
+
+
+def add_calibration_factor(id_passed, cal_factor):
+    video = get_video(id_passed)
+    video.calibration_factor = cal_factor
     db.session.commit()
 
 
 def add_cross_sections(vid_id_passed, cross_dist_passed):
+    '''
+    this gets a list of the tissues attached to a vid
+    and accept a list of cross_distances
+    then uses the order of the tissues left to right and the passed list 0.. to match them
+    '''
     video = get_video(vid_id_passed)
     tissues = video.tissues
     for i, tissue in enumerate(tissues):
