@@ -5,7 +5,7 @@ import camera_control.camera_pi as cams
 import forms
 import models
 from camera_control.camera_pi import Camera
-from flask import Flask, Response, redirect, render_template, request
+from flask import Flask, Response, jsonify, redirect, render_template, request
 
 logging.basicConfig(filename='app.log',
                     format='[%(filename)s:%(lineno)d] %(message)s', level=logging.DEBUG)
@@ -32,6 +32,7 @@ app = create_app()
 
 
 temp_val = 512
+
 
 def get_post_info(wtforms_list):
     # from flask multi tissue tracking
@@ -97,12 +98,16 @@ def index_post():
             models.insert_bio_reactor(bio_reactor_num)
 
         date_string = form.date_recorded.data.strftime('%m_%d_%Y')
-        vid_name = date_string + "_" + "Freq" + str(form.frequency.data) + "_" + "Bio" + str(bio_reactor_num) + ".h264"
+        vid_name = date_string + "_" + "Freq" + \
+            str(form.frequency.data) + "_" + "Bio" + \
+            str(bio_reactor_num) + ".h264"
         path_to_file = f'static/uploads/{experiment_num}/{date_string}/videoFiles/{vid_name}'
-        new_video_id = models.insert_video(form.date_recorded.data, experiment_num, bio_reactor_num, form.frequency.data, path_to_file)
+        new_video_id = models.insert_video(
+            form.date_recorded.data, experiment_num, bio_reactor_num, form.frequency.data, path_to_file)
         Camera.rec(10, path_to_file)
         # add the tissues to the databse as children of the vid, experiment and bio reactor
-        add_tissues(li_of_post_info, experiment_num, bio_reactor_num, new_video_id)
+        add_tissues(li_of_post_info, experiment_num,
+                    bio_reactor_num, new_video_id)
         return'''
         <h1>check database</h1>
         '''
@@ -117,17 +122,17 @@ def feed():
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
-@app.route('/stageup')
+@app.route('/stageup', methods=['POST'])
 def stage_up():
-    return redirect('/')
+    return jsonify({'status': 'OK'})
 
 
-@app.route('/stagedown')
+@app.route('/stagedown', methods=['POST'])
 def stage_down():
-    return redirect('/')
+    return jsonify({'status': 'OK'})
 
 
-@app.route('/focusup')
+@app.route('/focusup', methods=['POST'])
 def focus_up():
     global temp_val
     if temp_val < 1000:
@@ -137,10 +142,10 @@ def focus_up():
     dat1 = (value >> 8) & 0x3f
     dat2 = value & 0xf0
     os.system("i2cset -y 0 0x0c %d %d" % (dat1, dat2))
-    return redirect('/')
+    return jsonify({'status': 'OK'})
 
 
-@app.route('/focusdown')
+@app.route('/focusdown', methods=['POST'])
 def focus_down():
     global temp_val
     if (temp_val >= 12):
@@ -150,10 +155,10 @@ def focus_down():
     dat1 = (value >> 8) & 0x3f
     dat2 = value & 0xf0
     os.system("i2cset -y 0 0x0c %d %d" % (dat1, dat2))
-    return redirect('/')
+    return jsonify({'status': 'OK'})
 
 
-@app.route('/upload')
+@app.route('/upload', methods=['POST'])
 def upload():
 
     os.system(f'rsync -a --ignore-existing static/uploads/ {ip_of_host}:~/uploader/')
