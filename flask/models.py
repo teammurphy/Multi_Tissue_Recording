@@ -90,7 +90,7 @@ class Bio_reactor(db.Model):
 
 def delete_empties():
     for (root, dirs, files) in os.walk('static/uploads', topdown=False):
-        if root == 'static/uploads':
+        if root == 'static/uploads/':
             break
         if not os.listdir(root):
             logging.info(root)
@@ -163,7 +163,7 @@ def get_bio_reactor_by_id(bio_reactor_id_passed):
     return bio_reactor
 
 
-def get_tissue(tissue_id_passed):
+def get_tissue_by_id(tissue_id_passed):
     # gets tissue by the tissue id
     tissue = Tissue.query.filter_by(tissue_id=tissue_id_passed).first()
     return tissue
@@ -194,7 +194,7 @@ def get_video(video_id_passed):
 
 
 def add_tissue_csv(id_passed, path_passed):
-    tissue = get_tissue(id_passed)
+    tissue = get_tissue_by_id(id_passed)
     tissue.csv_path = path_passed
     db.session.commit()
 
@@ -253,10 +253,13 @@ def get_all_bio_reactors():
 
 
 def delete_tissue(tissue_id):
-    tissue = get_tissue(tissue_id)
+    logging.info(tissue_id)
+    tissue = get_tissue_by_id(tissue_id)
+    logging.info(tissue)
     logging.info(tissue.csv_path)
+
     file_path = tissue.csv_path
-    if os.path.exists(file_path):
+    if file_path is not None and os.path.exists(file_path):
         os.remove(tissue.csv_path)
         delete_empties()
     else:
@@ -281,7 +284,9 @@ def delete_video(vid_id):
 def delete_expirement(exp_id):
     exp = get_experiment_by_id(exp_id)
     experiment_num = exp.experiment_num
-    shutil.rmtree(f'static/uploads/{experiment_num}')
+    file_path = f'static/uploads/{experiment_num}'
+    if os.path.exists(file_path):
+        shutil.rmtree(file_path)
     db.session.delete(exp)
     db.session.commit()
 
