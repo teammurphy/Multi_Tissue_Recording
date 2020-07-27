@@ -2,17 +2,33 @@
 
 <head>
   <title> Jacks Stream </title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 </head>
 
 <body>
   <h1> Live Streaming </h1>
 
+  <script type=text/javascript>
+    $(function() {
+      $('button[type=button]').click(function() {
+        var toUrl = $(this).val()
+        $.ajax({
+          type: 'POST',
+          url: toUrl,
+          success: function(response) {
+            console.log(response);
+          }
+        });
+      });
+    });
+  </script>
+
   <h3><img src="{{ url_for("feed") }}" width="50%"></h3>
-  <a href="/focusup"><input type="button" value="Focus Up"></a>
-  <a href="/focusdown"><input type="button" value="Focus Down"></a>
-  <a href="/stageup"><input type="button" value="Stage Up (Not Working Yet)"></a>
-  <a href="/stagedown"><input type="button" value="Stage Down (Not Working Yet)"></a>
-  <a href="/upload"><input type="button" value="Upload uploads folder"></a>
+  <button type="button" id="focusUp" value="/focusup">Focus Up</button>
+  <button type="button" id="focusDown" value="/focusdown">Focus Down</button>
+  <button type="button" id="stageUp" value="/stageup">Stage Up(coming soon)</button>
+  <button type="button" id="stageDown" value="/stagedown">Stage Down(coming soon)</button>
+  <button type="button" id="upload" value="/upload">Upload uploads folder</button>
   <form method=post action="" enctype="multipart/form-data">
     <fieldset>
 
