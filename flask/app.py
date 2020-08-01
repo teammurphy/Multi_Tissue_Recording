@@ -118,13 +118,13 @@ def feed():
 
 @app.route('/stageup', methods=['POST'])
 def stage_up():
-	mot_contrl.rotate(300, 1)
+	mot_contrl.rotate(300, -1)
 	return jsonify({'status': 'OK'})
 
 
 @app.route('/stagedown', methods=['POST'])
 def stage_down():
-	mot_contrl.rotate(300, -1)
+	mot_contrl.rotate(300, 1)
 	return jsonify({'status': 'OK'})
 
 
