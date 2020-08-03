@@ -2,22 +2,29 @@ import time
 
 import RPi.GPIO as GPIO
 
-step_pin = 17
-dir_pin = 27
-sleep_time = .001
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(step_pin, GPIO.OUT)
-GPIO.setup(dir_pin, GPIO.OUT)
+class motor_stepper:
+	def __init__(self):
+		self.step_pin = 17
+		self.dir_pin = 27
+		self.sleep_time = .001
+		GPIO.setmode(GPIO.BCM)
+		GPIO.setup(self.step_pin, GPIO.OUT)
+		GPIO.setup(self.dir_pin, GPIO.OUT)
 
-# 200 steps in full step mode = full turn?
+	def rotate(self, num_steps, direction):
+		if direction == 1:
+			GPIO.output(self.dir_pin, GPIO.HIGH)
+		else:
+			GPIO.output(self.dir_pin, GPIO.LOW)
 
-count = 0
-while count < 300:
-	GPIO.output(step_pin, GPIO.HIGH)
-	time.sleep(sleep_time)
-	GPIO.output(step_pin, GPIO.LOW)
-	time.sleep(sleep_time)
-	count += 1
-	print(count)
+		count = 0
+		while count < num_steps:
+			GPIO.output(self.step_pin, GPIO.HIGH)
+			time.sleep(self.sleep_time)
+			GPIO.output(self.step_pin, GPIO.LOW)
+			time.sleep(self.sleep_time)
+			count += 1
+		return
 
-GPIO.cleanup()
+	def __del__(self):
+		GPIO.cleanup()
