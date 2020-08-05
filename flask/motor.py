@@ -35,5 +35,6 @@ class motor_stepper:
 			GPIO.output(self.light_pin, GPIO.LOW)
 		return
 
-	def __del__(self):
+	def cleanup(self):
+		GPIO.output(self.light_pin, GPIO.LOW)
 		GPIO.cleanup()
