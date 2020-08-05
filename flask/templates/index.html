@@ -7,7 +7,11 @@
 
 <body>
   <h1> Live Streaming </h1>
-
+  <form method="post" action="/set_ip">
+    <input type="text" name="ipip" placeholder="IP of tracking"/>
+    <input type="submit" value="Submit"/>
+  </form>
+  {{ ip }}
   <script type=text/javascript>
     $(function() {
       $('button[type=button]').click(function() {
@@ -28,7 +32,10 @@
   <button type="button" id="focusDown" value="/focusdown">Focus Down</button>
   <button type="button" id="stageUp" value="/stageup">Stage Up</button>
   <button type="button" id="stageDown" value="/stagedown">Stage Down</button>
-  <button type="button" id="upload" value="/upload">Upload uploads folder</button>
+  <button type="button" id="lightoff" value="/lightoff">Light Off</button>
+  <button type="button" id="lighton" value="/lighton">Light On</button>
+  <button type="button" id="shutdown" value="/shutdown">Shutdown</button>
+
   <form method=post action="" enctype="multipart/form-data">
     <fieldset>
 
@@ -55,6 +62,10 @@
 
       {{ form.frequency.label }}<br>
       {{ form.frequency }}
+      <br>
+
+      {{ form.vid_length.label }}<br>
+      {{ form.vid_length }}
       <br>
 
       {{ form.submit }}

@@ -24,6 +24,7 @@ class upload_to_b_form(FlaskForm):
     frequency = DecimalField('Enter the Frequency')
     bio_reactor_num = IntegerField('Enter Bio Reactor Number')
     experiment_num = IntegerField('Enter Experiment number')
+    vid_length = IntegerField('Enter the length of recording')
     submit = SubmitField('Submit')
 
 
