@@ -104,7 +104,6 @@ def index_post():
 		path_to_file = f'static/uploads/{experiment_num}/{date_string}/videoFiles/{vid_name}'
 		new_video_id = models.insert_video(
 				form.date_recorded.data, experiment_num, bio_reactor_num, form.frequency.data, path_to_file)
-		print(form.vid_length.data)
 		Camera.rec(form.vid_length.data, path_to_file)
 		os.system(f'rsync -a --ignore-existing static/uploads/ {ip_of_host}:~/uploader/')
 		# add the tissues to the databse as children of the vid, experiment and bio reactor
@@ -167,12 +166,6 @@ def focus_down():
 	return jsonify({'status': 'OK'})
 
 
-@app.route('/upload', methods=['POST'])
-def upload():
-	os.system(f'rsync -a --ignore-existing static/uploads/ {ip_of_host}:~/uploader/')
-	return jsonify({'status': 'OK'})
-
-
 @app.route('/lighton', methods=['POST'])
 def light_on():
 	mot_contrl.light(True)
@@ -183,6 +176,13 @@ def light_on():
 def light_off():
 	mot_contrl.light(False)
 	return jsonify({'status': 'OK'})
+
+
+@app.route('/shutdown', methods=['POST'])
+def shut_down():
+	mot_contrl.cleanup()
+	request.environ.get('werkzeug.server.shutdown')()
+	return 'Server shutting down...'
 
 
 if __name__ == '__main__':
