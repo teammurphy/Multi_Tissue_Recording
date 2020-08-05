@@ -6,10 +6,12 @@ class motor_stepper:
 	def __init__(self):
 		self.step_pin = 17
 		self.dir_pin = 27
+		self.light_pin = 26
 		self.sleep_time = .001
 		GPIO.setmode(GPIO.BCM)
 		GPIO.setup(self.step_pin, GPIO.OUT)
 		GPIO.setup(self.dir_pin, GPIO.OUT)
+		GPIO.setup(self.light_pin, GPIO.OUT)
 
 	def rotate(self, num_steps, direction):
 		if direction == 1:
@@ -26,5 +28,13 @@ class motor_stepper:
 			count += 1
 		return
 
-	def __del__(self):
+	def light(self, on):
+		if on:
+			GPIO.output(self.light_pin, GPIO.HIGH)
+		else:
+			GPIO.output(self.light_pin, GPIO.LOW)
+		return
+
+	def cleanup(self):
+		GPIO.output(self.light_pin, GPIO.LOW)
 		GPIO.cleanup()

@@ -6,14 +6,14 @@ import forms
 import models
 import motor
 from camera_control.camera_pi import Camera
-from flask import Flask, Response, jsonify, render_template, request
+from flask import Flask, Response, jsonify, render_template, request, redirect
 
 logging.basicConfig(filename='app.log',
 					format='[%(filename)s:%(lineno)d] %(message)s', level=logging.DEBUG)
 logging.warning("New Run Starts Here")
 
 ip_of_host = '159.89.84.193'
-os.system(f"ssh-keygen -H {ip_of_host} >> ~/.ssh/known_hosts")
+os.system(f"ssh-keyscan -H {ip_of_host} >> ~/.ssh/known_hosts")
 
 
 def create_app():
@@ -35,6 +35,7 @@ app = create_app()
 
 temp_val = 512
 mot_contrl = motor.motor_stepper()
+
 
 def get_post_info(wtforms_list):
 	# from flask multi tissue tracking
@@ -103,17 +104,28 @@ def index_post():
 		path_to_file = f'static/uploads/{experiment_num}/{date_string}/videoFiles/{vid_name}'
 		new_video_id = models.insert_video(
 				form.date_recorded.data, experiment_num, bio_reactor_num, form.frequency.data, path_to_file)
-		Camera.rec(10, path_to_file)
+		Camera.rec(form.vid_length.data, path_to_file)
+		os.system(f'rsync -a --ignore-existing static/uploads/ {ip_of_host}:~/uploader/')
 		# add the tissues to the databse as children of the vid, experiment and bio reactor
 		add_tissues(li_of_post_info, experiment_num, bio_reactor_num, new_video_id)
 		return ''' <h1>check database</h1> '''
 	else:
-		return render_template("index.html", form=form)
+		return render_template("index.html", form=form, ip=ip_of_host)
 
 
 @app.route('/feed')
 def feed():
 	return Response(cams.gen(Camera()), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
+@app.route('/set_ip', methods=['POST'])
+def set_ip():
+	global ip_of_host
+	ip_of_host = request.form['ipip']
+	app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://newuser:newpassword@{ip_of_host}:3306/test_db'
+	os.system(f"ssh-keyscan -H {ip_of_host} >> ~/.ssh/known_hosts")
+	models.db.init_app(app)
+	return redirect('/')
 
 
 @app.route('/stageup', methods=['POST'])
@@ -154,10 +166,23 @@ def focus_down():
 	return jsonify({'status': 'OK'})
 
 
-@app.route('/upload', methods=['POST'])
-def upload():
-	os.system(f'rsync -a --ignore-existing static/uploads/ {ip_of_host}:~/uploader/')
+@app.route('/lighton', methods=['POST'])
+def light_on():
+	mot_contrl.light(True)
 	return jsonify({'status': 'OK'})
+
+
+@app.route('/lightoff', methods=['POST'])
+def light_off():
+	mot_contrl.light(False)
+	return jsonify({'status': 'OK'})
+
+
+@app.route('/shutdown', methods=['POST'])
+def shut_down():
+	mot_contrl.cleanup()
+	request.environ.get('werkzeug.server.shutdown')()
+	return 'Server shutting down...'
 
 
 if __name__ == '__main__':
