@@ -3,8 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-const int posPin = 29 //Note wiringPi is diff than BCM
-const int negPin = 26
+const int posPin = 29; //Note wiringPi is diff than BCM
+const int negPin = 26;
 
 int turnHigh() {
     wiringPiSetup();
