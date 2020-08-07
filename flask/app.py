@@ -177,6 +177,10 @@ def light_off():
 	mot_contrl.light(False)
 	return jsonify({'status': 'OK'})
 
+@app.route('/pulse', methods=['POST'])
+def pulser():
+	mot_contrl.pulse()
+	return jsonify({'status': 'OK'})
 
 @app.route('/shutdown', methods=['POST'])
 def shut_down():
