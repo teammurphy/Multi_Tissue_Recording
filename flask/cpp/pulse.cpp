@@ -6,14 +6,10 @@
 const int posPin = 29 //Note wiringPi is diff than BCM
 const int negPin = 26
 
-void setup() {
-    printf('Doign')
+int turnHigh() {
     wiringPiSetup();
     pinMode(posPin, OUTPUT);
     pinMode(negPin, INPUT);
-}
-
-int turnHigh() {
     digitalWrite(posPin, HIGH);
     delay(10000);
     digitalWrite(posPin, LOW);
