@@ -6,7 +6,7 @@ class motor_stepper:
 	def __init__(self):
 		self.step_pin = 16
 		self.dir_pin = 20
-		self.light_pin = 26
+		self.light_pin = 17
 		self.sleep_time = .001
 
 		self.pos_pin = 21
