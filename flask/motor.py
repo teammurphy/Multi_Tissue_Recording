@@ -1,59 +1,64 @@
 import time
-
+import threading
 import RPi.GPIO as GPIO
 
-class motor_stepper:
-	def __init__(self):
-		self.step_pin = 16
-		self.dir_pin = 20
-		self.light_pin = 17
-		self.sleep_time = .001
+step_pin = 16
+dir_pin = 20
+sleep_time = .001
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(step_pin, GPIO.OUT)
+GPIO.setup(dir_pin, GPIO.OUT)
 
-		self.pos_pin = 21
-		self.neg_pin = 12
-		self.pulse_dur = 5
-		self.delay = .001
+light_pin = 17
+GPIO.setup(light_pin, GPIO.OUT)
 
-		GPIO.setmode(GPIO.BCM)
-		GPIO.setup(self.step_pin, GPIO.OUT)
-		GPIO.setup(self.dir_pin, GPIO.OUT)
-		GPIO.setup(self.light_pin, GPIO.OUT)
-
-		GPIO.setup(self.pos_pin, GPIO.OUT)
-		GPIO.setup(self.neg_pin, GPIO.OUT)
-
-	def rotate(self, num_steps, direction):
-		if direction == 1:
-			GPIO.output(self.dir_pin, GPIO.HIGH)
-		else:
-			GPIO.output(self.dir_pin, GPIO.LOW)
-
-		count = 0
-		while count < num_steps:
-			GPIO.output(self.step_pin, GPIO.HIGH)
-			time.sleep(self.sleep_time)
-			GPIO.output(self.step_pin, GPIO.LOW)
-			time.sleep(self.sleep_time)
-			count += 1
-
-	def light(self, on):
-		if on:
-			GPIO.output(self.light_pin, GPIO.HIGH)
-		else:
-			GPIO.output(self.light_pin, GPIO.LOW)
-
-	def pulse(self):
-		GPIO.output(self.pos_pin, GPIO.HIGH)
-		time.sleep(self.pulse_dur)
-		GPIO.output(self.pos_pin, GPIO.LOW)
-		time.sleep(self.delay)
-		GPIO.output(self.neg_pin, GPIO.HIGH)
-		time.sleep(self.pulse_dur)
-		GPIO.output(self.neg_pin, GPIO.LOW)
-
-	def cleanup(self):
-		GPIO.output(self.light_pin, GPIO.LOW)
-		GPIO.cleanup()
+pos_pin = 21
+neg_pin = 12
+pulse_dur = 1
+delay = .001
+GPIO.setup(pos_pin, GPIO.OUT)
+GPIO.setup(neg_pin, GPIO.OUT)
 
 
+def rotate(num_steps, direction):
+	if direction == 1:
+		GPIO.output(dir_pin, GPIO.HIGH)
+	else:
+		GPIO.output(dir_pin, GPIO.LOW)
 
+	count = 0
+	while count < num_steps:
+		GPIO.output(step_pin, GPIO.HIGH)
+		time.sleep(sleep_time)
+		GPIO.output(step_pin, GPIO.LOW)
+		time.sleep(sleep_time)
+		count += 1
+
+
+def light(on):
+	if on:
+		GPIO.output(light_pin, GPIO.HIGH)
+	else:
+		GPIO.output(light_pin, GPIO.LOW)
+
+
+def pulse(frequency):
+	period = 1/frequency
+	zero_v_time = period - 2*pulse_dur
+	print(zero_v_time)
+	thread = threading.current_thread()
+	while getattr(thread, 'continues', True):
+		print('Running')
+		GPIO.output(pos_pin, GPIO.HIGH)
+		time.sleep(pulse_dur)
+		GPIO.output(pos_pin, GPIO.LOW)
+		time.sleep(delay)
+		GPIO.output(neg_pin, GPIO.HIGH)
+		time.sleep(pulse_dur)
+		GPIO.output(neg_pin, GPIO.LOW)
+		time.sleep(zero_v_time)
+
+
+def cleanup():
+	light(False)
+	GPIO.cleanup()

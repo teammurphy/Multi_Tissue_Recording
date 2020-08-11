@@ -1,5 +1,6 @@
 import logging
 import os
+import threading
 
 import camera_control.camera_pi as cams
 import forms
@@ -32,9 +33,9 @@ def create_app():
 
 
 app = create_app()
-
+pulse_thread = None
+freq = None
 temp_val = 512
-mot_contrl = motor.motor_stepper()
 
 
 def get_post_info(wtforms_list):
@@ -110,7 +111,7 @@ def index_post():
 		add_tissues(li_of_post_info, experiment_num, bio_reactor_num, new_video_id)
 		return ''' <h1>check database</h1> '''
 	else:
-		return render_template("index.html", form=form, ip=ip_of_host)
+		return render_template("index.html", form=form, ip=ip_of_host, freq=freq)
 
 
 @app.route('/feed')
@@ -130,13 +131,13 @@ def set_ip():
 
 @app.route('/stageup', methods=['POST'])
 def stage_up():
-	mot_contrl.rotate(300, -1)
+	motor.rotate(300, -1)
 	return jsonify({'status': 'OK'})
 
 
 @app.route('/stagedown', methods=['POST'])
 def stage_down():
-	mot_contrl.rotate(300, 1)
+	motor.rotate(300, 1)
 	return jsonify({'status': 'OK'})
 
 
@@ -168,23 +169,39 @@ def focus_down():
 
 @app.route('/lighton', methods=['POST'])
 def light_on():
-	mot_contrl.light(True)
+	motor.light(True)
 	return jsonify({'status': 'OK'})
 
 
 @app.route('/lightoff', methods=['POST'])
 def light_off():
-	mot_contrl.light(False)
+	motor.light(False)
 	return jsonify({'status': 'OK'})
+
 
 @app.route('/pulse', methods=['POST'])
 def pulser():
-	mot_contrl.pulse()
-	return jsonify({'status': 'OK'})
+	global pulse_thread, freq
+	freq = float(request.form['freq'])
+	pulse_thread = threading.Thread(target=motor.pulse, args=(freq,))
+	pulse_thread.start()
+	return redirect('/')
+
+
+@app.route('/pulse_end', methods=['POST'])
+def pulser_end():
+	global freq
+	if pulse_thread is not None:
+		pulse_thread.continues = False
+		pulse_thread.join()
+		freq = None
+	return redirect('/')
+
 
 @app.route('/shutdown', methods=['POST'])
 def shut_down():
-	mot_contrl.cleanup()
+	pulser_end()
+	motor.cleanup()
 	request.environ.get('werkzeug.server.shutdown')()
 	return 'Server shutting down...'
 
