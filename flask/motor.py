@@ -45,6 +45,7 @@ def light(on):
 def pulse(frequency):
 	period = 1/frequency
 	zero_v_time = period - 2*pulse_dur
+	print(zero_v_time)
 	thread = threading.current_thread()
 	while getattr(thread, 'continues', True):
 		print('Running')

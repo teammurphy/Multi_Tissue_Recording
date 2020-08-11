@@ -35,9 +35,14 @@
   <button type="button" id="lightoff" value="/lightoff">Light Off</button>
   <button type="button" id="lighton" value="/lighton">Light On</button>
   <button type="button" id="shutdown" value="/shutdown">Shutdown</button>
-  <button type="button" id="pulse" value="/pulse">Pulse</button>
-  <button type="button" id="pulse_end" value="/pulse_end">Pulse End</button>
-
+  <form method="post" action="/pulse">
+    <input type="text" name="freq" placeholder="Freq in Hz"/>
+    <input type="submit" value="Submit"/>
+  </form>
+  <form method="post" action="/pulse_end">
+    <input type="submit" value="Pusle End"/>
+  </form>
+  {{ freq }}
   <form method=post action="" enctype="multipart/form-data">
     <fieldset>
 

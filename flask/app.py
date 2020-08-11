@@ -34,6 +34,7 @@ def create_app():
 
 app = create_app()
 pulse_thread = None
+freq = None
 temp_val = 512
 
 
@@ -110,7 +111,7 @@ def index_post():
 		add_tissues(li_of_post_info, experiment_num, bio_reactor_num, new_video_id)
 		return ''' <h1>check database</h1> '''
 	else:
-		return render_template("index.html", form=form, ip=ip_of_host)
+		return render_template("index.html", form=form, ip=ip_of_host, freq=freq)
 
 
 @app.route('/feed')
@@ -180,20 +181,21 @@ def light_off():
 
 @app.route('/pulse', methods=['POST'])
 def pulser():
-	global pulse_thread
-	freq = .25
+	global pulse_thread, freq
+	freq = float(request.form['freq'])
 	pulse_thread = threading.Thread(target=motor.pulse, args=(freq,))
 	pulse_thread.start()
-	return jsonify({'status': 'OK'})
+	return redirect('/')
 
 
 @app.route('/pulse_end', methods=['POST'])
 def pulser_end():
+	global freq
 	if pulse_thread is not None:
 		pulse_thread.continues = False
 		pulse_thread.join()
-		print('Donezo')
-	return jsonify({'status': 'OK'})
+		freq = None
+	return redirect('/')
 
 
 @app.route('/shutdown', methods=['POST'])
