@@ -1,5 +1,6 @@
 import logging
 import os
+import threading
 
 import camera_control.camera_pi as cams
 import forms
@@ -32,9 +33,8 @@ def create_app():
 
 
 app = create_app()
-
+pulse_thread = None
 temp_val = 512
-mot_contrl = motor.motor_stepper()
 
 
 def get_post_info(wtforms_list):
@@ -130,13 +130,13 @@ def set_ip():
 
 @app.route('/stageup', methods=['POST'])
 def stage_up():
-	mot_contrl.rotate(300, -1)
+	motor.rotate(300, -1)
 	return jsonify({'status': 'OK'})
 
 
 @app.route('/stagedown', methods=['POST'])
 def stage_down():
-	mot_contrl.rotate(300, 1)
+	motor.rotate(300, 1)
 	return jsonify({'status': 'OK'})
 
 
@@ -168,23 +168,38 @@ def focus_down():
 
 @app.route('/lighton', methods=['POST'])
 def light_on():
-	mot_contrl.light(True)
+	motor.light(True)
 	return jsonify({'status': 'OK'})
 
 
 @app.route('/lightoff', methods=['POST'])
 def light_off():
-	mot_contrl.light(False)
+	motor.light(False)
 	return jsonify({'status': 'OK'})
+
 
 @app.route('/pulse', methods=['POST'])
 def pulser():
-	mot_contrl.pulse()
+	global pulse_thread
+	freq = .5
+	pulse_thread = threading.Thread(target=motor.pulse, args=(freq,))
+	pulse_thread.start()
 	return jsonify({'status': 'OK'})
+
+
+@app.route('/pulse_end', methods=['POST'])
+def pulser_end():
+	if pulse_thread is not None:
+		pulse_thread.continues = False
+		pulse_thread.join()
+		print('Donezo')
+	return jsonify({'status': 'OK'})
+
 
 @app.route('/shutdown', methods=['POST'])
 def shut_down():
-	mot_contrl.cleanup()
+	pulser_end()
+	motor.cleanup()
 	request.environ.get('werkzeug.server.shutdown')()
 	return 'Server shutting down...'
 
