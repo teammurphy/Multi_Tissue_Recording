@@ -14,7 +14,7 @@ GPIO.setup(light_pin, GPIO.OUT)
 
 pos_pin = 21
 neg_pin = 12
-pulse_dur = .5
+pulse_dur = 1
 delay = .001
 GPIO.setup(pos_pin, GPIO.OUT)
 GPIO.setup(neg_pin, GPIO.OUT)
@@ -43,11 +43,8 @@ def light(on):
 
 
 def pulse(frequency):
-	print('Called')
 	period = 1/frequency
 	zero_v_time = period - 2*pulse_dur
-	print('zero')
-	print(zero_v_time)
 	thread = threading.current_thread()
 	while getattr(thread, 'continues', True):
 		print('Running')

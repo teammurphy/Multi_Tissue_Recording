@@ -181,7 +181,7 @@ def light_off():
 @app.route('/pulse', methods=['POST'])
 def pulser():
 	global pulse_thread
-	freq = .5
+	freq = .25
 	pulse_thread = threading.Thread(target=motor.pulse, args=(freq,))
 	pulse_thread.start()
 	return jsonify({'status': 'OK'})
