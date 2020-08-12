@@ -1,9 +1,9 @@
 ''''
-This file is adapted from https://github.com/miguelgrinberg/flask-video-streaming
+Line 28 - 96 are adapted from https://github.com/miguelgrinberg/flask-video-streaming
 
 The MIT License (MIT)
 
-Copyright (c) 2014 Miguel Grinberg
+Copyright (c) 2014 Miguel Grinberg lines
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

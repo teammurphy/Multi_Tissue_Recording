@@ -4,9 +4,8 @@ import shutil
 from dataclasses import asdict, dataclass
 from datetime import datetime
 
-from pytz import timezone
-
 from flask_sqlalchemy import SQLAlchemy
+from pytz import timezone
 
 db = SQLAlchemy()
 
@@ -20,8 +19,8 @@ tz = timezone('EST')
 class Experiment(db.Model):
     experiment_id: int = db.Column(
         db.Integer, primary_key=True, autoincrement=True)
-    experiment_num: int = db.Column(
-        db.Integer, nullable=False, unique=True)
+    experiment_num: str = db.Column(
+        db.String(120), nullable=False, unique=True)
     vids = db.relationship(
         'Video', back_populates='experiment', passive_deletes=True)
 
@@ -44,7 +43,7 @@ class Video(db.Model):
     # calibration factor is the calibration distance / length if the drawn calibration line in pixels
     calibration_factor: float = db.Column(db.Float, nullable=True)
 
-    experiment_num: int = db.Column(db.Integer, db.ForeignKey(
+    experiment_num: str = db.Column(db.String(120), db.ForeignKey(
         'experiment.experiment_num', ondelete='CASCADE'), nullable=False)
     experiment = db.relationship('Experiment', back_populates='vids')
 
