@@ -23,7 +23,7 @@ def startup():
 
 
 def launch_app():
-	os.system('python3 /root/Multi_Tissue_Recording/flask/app.py')
+	os.system('sudo python3 /root/Multi_Tissue_Recording/flask/app.py')
 
 
 if __name__ == '__main__':
