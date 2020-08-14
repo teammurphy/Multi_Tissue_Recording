@@ -3,9 +3,26 @@
 <head>
   <title> Jacks Stream </title>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <style>
+* {
+  box-sizing: border-box;
+}
+
+.row {
+  display: flex;
+}
+
+/* Create two equal columns that sits next to each other */
+.column {
+  flex: 50%;
+  padding: 10px;
+}
+</style>
 </head>
 
 <body>
+  <div class="row">
+      <div class="column">
   <h1> Multi Tissue Recording </h1>
   <form method="post" action="/set_ip">
     <input type="text" name="ipip" placeholder="IP of tracking"/>
@@ -43,6 +60,8 @@
     <input type="submit" value="Pusle End"/>
   </form>
   {{ freq }}
+      </div>
+      <div class="column">
   <form method=post action="" enctype="multipart/form-data">
     <fieldset>
 
@@ -79,6 +98,8 @@
 
     </fieldset>
   </form>
+      </div>
+  </div>
   <hr>
   <p> @2020 Jack </p>
 </body>
