@@ -1,107 +1,93 @@
 <html>
 
 <head>
-  <title> Jacks Stream </title>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <style>
-* {
-  box-sizing: border-box;
-}
-
-.row {
-  display: flex;
-}
-
-/* Create two equal columns that sits next to each other */
-.column {
-  flex: 50%;
-  padding: 10px;
-}
-</style>
+    <title> Tissue Stream </title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename = 'styles/styles.css') }}">
 </head>
 
 <body>
-  <div class="row">
-      <div class="column">
-  <h1> Multi Tissue Recording </h1>
-  <form method="post" action="/set_ip">
-    <input type="text" name="ipip" placeholder="IP of tracking"/>
-    <input type="submit" value="Submit"/>
-  </form>
-  {{ ip }}
-  <script type=text/javascript>
-    $(function() {
-      $('button[type=button]').click(function() {
-        var toUrl = $(this).val()
-        $.ajax({
-          type: 'POST',
-          url: toUrl,
-          success: function(response) {
-            console.log(response);
-          }
-        });
-      });
-    });
-  </script>
+<div class="row">
+    <div class="column">
+        <h1> Multi Tissue Recording </h1>
+        <form method="post" action="/set_ip">
+            <input type="text" name="ipip" placeholder="IP of tracking"/>
+            <input type="submit" value="Submit"/>
+        </form>
+        {{ ip }}
+        <script type=text/javascript>
+            $(function () {
+                $('button[type=button]').click(function () {
+                    var toUrl = $(this).val()
+                    $.ajax({
+                        type: 'POST',
+                        url: toUrl,
+                        success: function (response) {
+                            console.log(response);
+                        }
+                    });
+                });
+            });
+        </script>
 
-  <h3><img src="{{ url_for("feed") }}" width="50%"></h3>
-  <button type="button" id="focusUp" value="/focusup">Focus Up</button>
-  <button type="button" id="focusDown" value="/focusdown">Focus Down</button>
-  <button type="button" id="stageUp" value="/stageup">Stage Up</button>
-  <button type="button" id="stageDown" value="/stagedown">Stage Down</button>
-  <button type="button" id="lightoff" value="/lightoff">Light Off</button>
-  <button type="button" id="lighton" value="/lighton">Light On</button>
-  <button type="button" id="shutdown" value="/shutdown">Shutdown</button>
-  <form method="post" action="/pulse">
-    <input type="text" name="freq" placeholder="Freq in Hz"/>
-    <input type="submit" value="Submit"/>
-  </form>
-  <form method="post" action="/pulse_end">
-    <input type="submit" value="Pusle End"/>
-  </form>
-  {{ freq }}
-      </div>
-      <div class="column">
-  <form method=post action="" enctype="multipart/form-data">
-    <fieldset>
+        <h3><img src="{{ url_for("feed") }}" width="100%"></h3>
+        <button type="button" id="focusUp" value="/focusup">Focus Up</button>
+        <button type="button" id="focusDown" value="/focusdown">Focus Down</button>
+        <button type="button" id="stageUp" value="/stageup">Stage Up</button>
+        <button type="button" id="stageDown" value="/stagedown">Stage Down</button>
+        <button type="button" id="lightoff" value="/lightoff">Light Off</button>
+        <button type="button" id="lighton" value="/lighton">Light On</button>
+        <button type="button" id="shutdown" value="/shutdown">Shutdown</button>
+        <form method="post" action="/pulse">
+            <input type="text" name="freq" placeholder="Freq in Hz"/>
+            <input type="submit" value="Submit"/>
+        </form>
+        <form method="post" action="/pulse_end">
+            <input type="submit" value="Pusle End"/>
+        </form>
+        {{ freq }}
+    </div>
+    <div class="column">
+        <form method=post action="" enctype="multipart/form-data">
+            <fieldset>
 
-      <legend> Uplaod Form </legend>
-      <!-- from flask multi tissue tracking -->
-      {{ form.hidden_tag() }}
+                <legend> Uplaod Form</legend>
+                <!-- from flask multi tissue tracking -->
+                {{ form.hidden_tag() }}
 
 
-      {{ form.date_recorded.label }}<br>
-      {{ form.date_recorded }}
-      <br>
+                {{ form.date_recorded.label }}<br>
+                {{ form.date_recorded }}
+                <br>
 
-      {{ form.post.label }}<br>
-      {{ form.post}}
-      <br>
+                {{ form.post.label }}<br>
+                {{ form.post }}
+                <br>
 
-      {{ form.bio_reactor_num.label }}<br>
-      {{ form.bio_reactor_num  }}
-      <br>
+                {{ form.bio_reactor_num.label }}<br>
+                {{ form.bio_reactor_num }}
+                <br>
 
-      {{ form.experiment_num.label }}<br>
-      {{ form.experiment_num }}
-      <br>
+                {{ form.experiment_num.label }}<br>
+                {{ form.experiment_num }}
+                <br>
 
-      {{ form.frequency.label }}<br>
-      {{ form.frequency }}
-      <br>
+                {{ form.frequency.label }}<br>
+                {{ form.frequency }}
+                <br>
 
-      {{ form.vid_length.label }}<br>
-      {{ form.vid_length }}
-      <br>
+                {{ form.vid_length.label }}<br>
+                {{ form.vid_length }}
+                <br>
 
-      {{ form.submit }}
+                {{ form.submit }}
 
-    </fieldset>
-  </form>
-      </div>
-  </div>
-  <hr>
-  <p> @2020 Jack </p>
+            </fieldset>
+        </form>
+    </div>
+</div>
+<hr>
+<p> @2020 Jack F. Murphy</p>
 </body>
 
 </html>
