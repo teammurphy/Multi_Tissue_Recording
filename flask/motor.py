@@ -48,7 +48,6 @@ def pulse(frequency):
 	print(zero_v_time)
 	thread = threading.current_thread()
 	while getattr(thread, 'continues', True):
-		print('Running')
 		GPIO.output(pos_pin, GPIO.HIGH)
 		time.sleep(pulse_dur)
 		GPIO.output(pos_pin, GPIO.LOW)
