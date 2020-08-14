@@ -131,13 +131,13 @@ def set_ip():
 
 @app.route('/stageup', methods=['POST'])
 def stage_up():
-	motor.rotate(300, -1)
+	motor.rotate(300, 1)
 	return jsonify({'status': 'OK'})
 
 
 @app.route('/stagedown', methods=['POST'])
 def stage_down():
-	motor.rotate(300, 1)
+	motor.rotate(300, -1)
 	return jsonify({'status': 'OK'})
 
 
