@@ -45,12 +45,14 @@ class Video(db.Model):
     # calibration factor is the calibration distance / length if the drawn calibration line in pixels
     calibration_factor: float = db.Column(db.Float, nullable=True)
 
+    bio_reactor_number: int = db.Column(db.Integer, nullable=False)
+
     experiment_num: str = db.Column(db.String(120), db.ForeignKey(
         'experiment.experiment_num', ondelete='CASCADE'), nullable=False)
     experiment = db.relationship('Experiment', back_populates='vids')
 
-    bio_reactor_number: int = db.Column(db.Integer, db.ForeignKey(
-        'bio_reactor.bio_reactor_number', ondelete='CASCADE'), nullable=False)
+    bio_reactor_id: int = db.Column(db.Integer, db.ForeignKey(
+        'bio_reactor.bio_reactor_id', ondelete='CASCADE'), nullable=True)
     bio_reactor = db.relationship(
         'Bio_reactor', back_populates='vids')
 
@@ -82,8 +84,10 @@ class Tissue(db.Model):
 class Bio_reactor(db.Model):
     bio_reactor_id: int = db.Column(
         db.Integer, primary_key=True, autoincrement=True)
-    bio_reactor_number: int = db.Column(
-        db.Integer, unique=True, nullable=False)
+    bio_reactor_number: int = db.Column(db.Integer, nullable=False)
+
+    date_added: datetime.date = db.Column(db.Date, nullable=False)
+
     vids = db.relationship(
         'Video', back_populates='bio_reactor', passive_deletes=True)
 
@@ -101,8 +105,8 @@ class Post(db.Model):
     right_post_height: float = db.Column(db.Float, nullable=False)
     right_tissue_height: float = db.Column(db.Float, nullable=False)
 
-    bio_reactor_number: int = db.Column(db.Integer, db.ForeignKey(
-        'bio_reactor.bio_reactor_number', ondelete='CASCADE'), nullable=False)
+    bio_reactor_id: int = db.Column(db.Integer, db.ForeignKey(
+        'bio_reactor.bio_reactor_id', ondelete='CASCADE'), nullable=False)
     bio_reactor = db.relationship('Bio_reactor', back_populates='posts')
 
 
@@ -118,13 +122,18 @@ def delete_empties():
 
 
 def populate():
-    insert_bio_reactor(1)
+    x = datetime(2020, 5, 17)
+    insert_bio_reactor(1, x)
     insert_post(0, 3, 2.8, 3, 2.8, 1)
     insert_post(1, 3, 2.8, 3, 2.8, 1)
     insert_post(2, 3, 2.8, 3, 2.8, 1)
     insert_post(3, 3, 2.8, 3, 2.8, 1)
     insert_post(4, 3, 2.8, 3, 2.8, 1)
     insert_post(5, 3, 2.8, 3, 2.8, 1)
+    insert_bio_reactor(1, datetime(2020, 5, 19))
+    insert_bio_reactor(1, datetime(2020, 5, 21))
+    insert_bio_reactor(1, datetime(2020, 5, 1))
+    insert_bio_reactor(1, x)
 
 
 def insert_experiment(num_passed):
@@ -136,12 +145,14 @@ def insert_experiment(num_passed):
         logging.info('already exists')
 
 
-def insert_video(date_recorded_passed, experiment_num_passed, bio_reactor_num_passed, frequency_passed, save_path_passed):
+def insert_video(date_recorded_passed, experiment_num_passed, bio_reactor_id_passed, frequency_passed, save_path_passed, bio_reactor_num_passed):
 
     new_video = Video(date_recorded=date_recorded_passed,
-                      experiment_num=experiment_num_passed, bio_reactor_number=bio_reactor_num_passed, frequency=frequency_passed, save_location=save_path_passed)
+                      experiment_num=experiment_num_passed,
+                      bio_reactor_id=bio_reactor_id_passed,
+                      frequency=frequency_passed, save_location=save_path_passed, bio_reactor_number=bio_reactor_num_passed)
     new_video.expirment = get_experiment_by_num(experiment_num_passed)
-    new_video.bio_reactor = get_bio_reactor_by_num(bio_reactor_num_passed)
+    new_video.bio_reactor = get_bio_reactor_by_id(bio_reactor_id_passed)
 
     db.session.add(new_video)
     db.session.commit()
@@ -164,19 +175,31 @@ def insert_tissue_sample_csv(tissue_number_passed, tissue_type_passed, post_pass
     db.session.commit()
 
 
-def insert_bio_reactor(num_passed):
-    if (db.session.query(Bio_reactor.bio_reactor_number).filter_by(bio_reactor_number=num_passed).scalar() is None):
-        new_bio_reactor = Bio_reactor(bio_reactor_number=num_passed)
+def insert_bio_reactor(num_passed, date_added_passed):
+    # TODO: if number is the same add with diffrent id and date
+
+    bio_reactor_id = -1
+
+    if (db.session.query(Bio_reactor.bio_reactor_id).filter_by(bio_reactor_number=num_passed, date_added=date_added_passed).scalar() is None):
+        new_bio_reactor = Bio_reactor(
+            bio_reactor_number=num_passed, date_added=date_added_passed)
         db.session.add(new_bio_reactor)
         db.session.commit()
+        bio_reactor_id = new_bio_reactor.bio_reactor_id
     else:
         logging.info('already exists')
+        # TODO: if date and num already exist ask uset to overwrite ??
+        bio_reactor = Bio_reactor.query.filter_by(
+            bio_reactor_number=num_passed, date_added=date_added_passed).first()
+        bio_reactor_id = bio_reactor.bio_reactor_id
+
+    return bio_reactor_id
 
 
-def insert_post(post_number_passed, left_post_height_passed, left_tissue_height_passed, right_post_height_passed, right_tissue_height_passed, bio_reactor_num_passed):
-    if (db.session.query(Post.post_id).filter_by(post_number=post_number_passed, bio_reactor_number=bio_reactor_num_passed).scalar() is None):
+def insert_post(post_number_passed, left_post_height_passed, left_tissue_height_passed, right_post_height_passed, right_tissue_height_passed, bio_reactor_id_passed):
+    if (db.session.query(Post.post_id).filter_by(post_number=post_number_passed, bio_reactor_id=bio_reactor_id_passed).scalar() is None):
         new_post = Post(post_number=post_number_passed, left_post_height=left_post_height_passed, left_tissue_height=left_tissue_height_passed,
-                        right_post_height=right_post_height_passed, right_tissue_height=right_tissue_height_passed, bio_reactor_number=bio_reactor_num_passed)
+                        right_post_height=right_post_height_passed, right_tissue_height=right_tissue_height_passed, bio_reactor_id=bio_reactor_id_passed)
         db.session.add(new_post)
         db.session.commit()
     else:
@@ -351,7 +374,47 @@ def delete_bio_reactor(bio_id):
     db.session.commit()
 
 
+def calculate_bio_id(bio_reactor_num_passed, date_passed):
+
+    # TODO: add better error handling if bio doesnt exist
+
+    bio_reactor = (db.session.query(Bio_reactor).filter(
+        Bio_reactor.bio_reactor_number == bio_reactor_num_passed, Bio_reactor.date_added <= date_passed).order_by(Bio_reactor.date_added.desc())).first()
+
+    return bio_reactor.bio_reactor_id
+
+
+def bio_reactors_to_xml(experiment_num_passed, li_of_bio_ids):
+    root = et.Element('bio_reactors')
+    for bio_id in li_of_bio_ids:
+        bio_reactor_elem = et.SubElement(root, 'bio_reactor')
+        bio_reactor_elem.set('bio_reactor_id', str(bio_id))
+        bio_reactor = get_bio_reactor_by_id(bio_id)
+
+        dic = asdict(bio_reactor)
+        for key, val in dic.items():
+            child = et.Element(key)
+            child.text = str(val)
+            bio_reactor_elem.append(child)
+
+        if (bio_reactor.posts):
+            posts_elem = et.SubElement(bio_reactor_elem, 'posts')
+            for post in bio_reactor.posts:
+                post_elem = et.SubElement(posts_elem, 'post')
+                post_dic = asdict(post)
+                post_elem.set('post_num', str(post_dic['post_number']))
+                for key, val in post_dic.items():
+                    child = et.Element(key)
+                    child.text = str(val)
+                    post_elem.append(child)
+
+    tree = et.ElementTree(root)
+    with open(f'static/uploads/{experiment_num_passed}/bio_reactor_exp_num_{experiment_num_passed}.xml', 'wb') as f:
+        tree.write(f)
+
+
 def experment_to_xml(experiment_num):
+    used_bios_ids = []
     experiment = get_experiment_by_num(experiment_num)
     elem = et.Element('experiment')
     elem.set('experiment_num', experiment_num)
@@ -363,6 +426,8 @@ def experment_to_xml(experiment_num):
             video_elemant = et.SubElement(videos_elemant, 'video')
             video_elemant.set('video_id', str(dic['video_id']))
             for key, val in dic.items():
+                if key == 'bio_reactor_id' and val not in used_bios_ids:
+                    used_bios_ids.append(val)
                 child = et.Element(key)
                 child.text = str(val)
                 video_elemant.append(child)
@@ -379,6 +444,8 @@ def experment_to_xml(experiment_num):
                         child = et.Element(key)
                         child.text = str(val)
                         tissue_elemant.append(child)
+
+    bio_reactors_to_xml(experiment_num, used_bios_ids)
 
     tree = et.ElementTree(elem)
     with open(f'static/uploads/{experiment_num}/{experiment_num}.xml', 'wb') as f:
