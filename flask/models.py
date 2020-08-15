@@ -39,13 +39,13 @@ class Video(db.Model):
 
     save_location: str = db.Column(db.String(120), nullable=False)
 
+    bio_reactor_number: int = db.Column(db.Integer, nullable=True)
+
     # calibration distance is the user inputed length in mm of marker used to calibrate
     calibration_distance: float = db.Column(db.Float, nullable=True)
 
     # calibration factor is the calibration distance / length if the drawn calibration line in pixels
     calibration_factor: float = db.Column(db.Float, nullable=True)
-
-    bio_reactor_number: int = db.Column(db.Integer, nullable=False)
 
     experiment_num: str = db.Column(db.String(120), db.ForeignKey(
         'experiment.experiment_num', ondelete='CASCADE'), nullable=False)
@@ -130,10 +130,6 @@ def populate():
     insert_post(3, 3, 2.8, 3, 2.8, 1)
     insert_post(4, 3, 2.8, 3, 2.8, 1)
     insert_post(5, 3, 2.8, 3, 2.8, 1)
-    insert_bio_reactor(1, datetime(2020, 5, 19))
-    insert_bio_reactor(1, datetime(2020, 5, 21))
-    insert_bio_reactor(1, datetime(2020, 5, 1))
-    insert_bio_reactor(1, x)
 
 
 def insert_experiment(num_passed):
@@ -232,6 +228,12 @@ def get_bio_reactor_by_id(bio_reactor_id_passed):
     return bio_reactor
 
 
+def get_bio_reactor_number(bio_reactor_id_passed):
+    bio_reactor = Bio_reactor.query.filter_by(
+        bio_reactor_id=bio_reactor_id_passed).first()
+    return bio_reactor.bio_reactor_number
+
+
 def get_tissue_by_id(tissue_id_passed):
     # gets tissue by the tissue id
     tissue = Tissue.query.filter_by(tissue_id=tissue_id_passed).first()
@@ -318,6 +320,16 @@ def get_all_bio_reactors():
     result = []
     all = db.session.query(Bio_reactor).all()
     [result.append(asdict(row)) for row in all]
+    return result
+
+
+def get_bio_choices():
+    result = []
+    [result.append((bio['bio_reactor_id'], f"Bio_num: {bio['bio_reactor_number']} Date Updated: {bio['date_added']}"))
+     for bio in get_all_bio_reactors()]
+
+    logging.info(result)
+
     return result
 
 
