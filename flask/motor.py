@@ -10,7 +10,9 @@ GPIO.setup(step_pin, GPIO.OUT)
 GPIO.setup(dir_pin, GPIO.OUT)
 
 light_pin = 17
+other_light = 25
 GPIO.setup(light_pin, GPIO.OUT)
+GPIO.setup(other_light, GPIO.OUT)
 
 pos_pin = 21
 neg_pin = 12
@@ -38,8 +40,10 @@ def rotate(num_steps, direction):
 def light(on):
 	if on:
 		GPIO.output(light_pin, GPIO.HIGH)
+		GPIO.output(other_light, GPIO.HIGH)
 	else:
 		GPIO.output(light_pin, GPIO.LOW)
+		GPIO.output(other_light, GPIO.LOW)
 
 
 def pulse(frequency):
