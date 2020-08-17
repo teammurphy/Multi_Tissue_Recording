@@ -74,48 +74,50 @@ def add_tissues(li_of_post_info, experiment_num_passed, bio_reactor_num_passed, 
 
 @app.route('/', methods=['GET', 'POST'])
 def index_post():
-	try:
-		form = forms.upload_to_b_form()
-		form.bio_reactor.choices = models.get_bio_choices()
-	except:
-		return render_template('whatsTheIp.html')
-	if request.method == 'POST':
-	    # TODO: add form validation
-	    '''
-	    is a list of info about tissue 'empty' if string not in use
-	    'tissue_number,tissue_type' if it is in use
-	    tup[0] is count of tissues tup[1] is list of tiisue infor
-	    '''
-	    tup = get_post_info(form.post.entries)
-	    li_of_post_info = tup[1]
-	    logging.info(li_of_post_info)
+    try:
+        form = forms.upload_to_b_form()
+        form.bio_reactor.choices = models.get_bio_choices()
+    except:
+        return render_template('whatsTheIp.html')
+    if request.method == 'POST':
+        # TODO: add form validation
+        '''
+        is a list of info about tissue 'empty' if string not in use
+        'tissue_number,tissue_type' if it is in use
+        tup[0] is count of tissues tup[1] is list of tiisue infor
+        '''
+        tup = get_post_info(form.post.entries)
+        li_of_post_info = tup[1]
+        logging.info(li_of_post_info)
 
-	    # REVIEW: ideally would like to make these drop downs for experminet and bio reactor
+        # REVIEW: ideally would like to make these drop downs for experminet and bio reactor
 
-	    # checks if experiment exsits if it does makes it
-	    experiment_num = form.experiment_num.data
-	    logging.info(experiment_num)
-	    if models.get_experiment_by_num(experiment_num) is None:
-	        models.insert_experiment(experiment_num)
+        # checks if experiment exsits if it does makes it
+        experiment_num = form.experiment_num.data
+        logging.info(experiment_num)
+        if models.get_experiment_by_num(experiment_num) is None:
+            models.insert_experiment(experiment_num)
 
-	    # checks if experiment exsits if it does makes it
-	    bio_reactor_num = models.get_bio_reactor_number(bio_reactor_id)
-	    logging.info(bio_reactor_num)
+        # checks if experiment exsits if it does makes it
+        bio_reactor_id = form.bio_reactor.data
+        bio_reactor_num = models.get_bio_reactor_number(bio_reactor_id)
+        logging.info(bio_reactor_num)
 
-	    date_string = form.date_recorded.data.strftime('%m_%d_%Y')
-	    vid_name = date_string + "_" + "Freq" + \
-	        str(form.frequency.data) + "_" + "Bio" + \
-	        str(bio_reactor_num) + ".h264"
-	    path_to_file = f'static/uploads/{experiment_num}/{date_string}/videoFiles/{vid_name}'
-	    new_video_id = models.insert_video(
-	        form.date_recorded.data, experiment_num, bio_reactor_id, form.frequency.data, path_to_file)
-	    Camera.rec(form.vid_length.data, path_to_file, bio_reactor_num)
-	    os.system(
-	        f'rsync -a --ignore-existing static/uploads/ {ip_of_host}:~/uploader/')
-	    # add the tissues to the databse as children of the vid, experiment and bio reactor
-	    add_tissues(li_of_post_info, experiment_num,
-	                bio_reactor_num, new_video_id)
-	    return ''' <h1>check database</h1> '''
+        date_string = form.date_recorded.data.strftime('%m_%d_%Y')
+        vid_name = date_string + "_" + "Freq" + \
+                   str(form.frequency.data) + "_" + "Bio" + \
+                   str(bio_reactor_num) + ".h264"
+        path_to_file = f'static/uploads/{experiment_num}/{date_string}/videoFiles/{vid_name}'
+        new_video_id = models.insert_video(
+            form.date_recorded.data, experiment_num, bio_reactor_id, form.frequency.data, path_to_file, bio_reactor_num)
+        Camera.rec(form.vid_length.data, path_to_file)
+        os.system(
+            f'rsync -avrz --ignore-existing /root/Multi_Tissue_Recording/flask/static/uploads/ {ip_of_host}:~/uploader/')
+
+        # add the tissues to the databse as children of the vid, experiment and bio reactor
+        add_tissues(li_of_post_info, experiment_num,
+                    bio_reactor_num, new_video_id)
+        return ''' <h1>check database</h1> '''
     else:
         return render_template("index.html", form=form, ip=ip_of_host, freq=freq)
 

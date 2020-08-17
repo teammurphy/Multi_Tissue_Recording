@@ -97,7 +97,6 @@ class Camera(object):
 
     def rec(time, path_to_file):
         global camera
-        print(path_to_file)
         dirpath = path_to_file.split('/')[:-1]
         dirpath = '/'.join(dirpath)
         if not os.path.exists(dirpath):
