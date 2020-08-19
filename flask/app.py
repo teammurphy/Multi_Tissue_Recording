@@ -110,16 +110,13 @@ def index_post():
         path_to_file = f'static/uploads/{experiment_num}/{date_string}/videoFiles/{vid_name}'
         new_video_id = models.insert_video(
             form.date_recorded.data, experiment_num, bio_reactor_id, form.frequency.data, path_to_file, bio_reactor_num)
-        print('rec')
         Camera.rec(form.vid_length.data, path_to_file)
-        print('rsync')
-        # os.system(
-        #    f'rsync -avrz --ignore-existing --bwlimit=6000 /root/Multi_Tissue_Recording/flask/static/uploads/ {ip_of_host}:~/uploader/')
-        print(ip_of_host)
         fold_path = f'{experiment_num}/{date_string}/videoFiles'
-        os.system(f'ssh root@{ip_of_host} "mkdir -r {fold_path}"')
+
+        os.system(f'ssh root@{ip_of_host} "mkdir -p ~/uploader/{fold_path}"')
         os.system(
-            f'scp static/uploads/{fold_path}/{vid_name} {ip_of_host}:~/uploader/{fold_path}/{vid_name}')
+            f'scp static/uploads/{fold_path}/{vid_name} root@{ip_of_host}:~/uploader/{fold_path}/{vid_name}')
+
         # add the tissues to the databse as children of the vid, experiment and bio reactor
         add_tissues(li_of_post_info, experiment_num,
                     bio_reactor_num, new_video_id)
