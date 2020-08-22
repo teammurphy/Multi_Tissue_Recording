@@ -51,7 +51,7 @@ class Camera(object):
     def initialize(self):
         if Camera.thread is None:
             # start background frame thread
-            Camera.thread = threading.Thread(target=self._thread)
+            Camera.thread = threading.Thread(target=self._thread, daemon=True)
             Camera.thread.start()
 
             # wait until frames start to be available
@@ -95,13 +95,12 @@ class Camera(object):
                 break
         cls.thread = None
 
-    def rec(time, path_to_file):
-        global camera
-        dirpath = path_to_file.split('/')[:-1]
-        dirpath = '/'.join(dirpath)
-        if not os.path.exists(dirpath):
-            os.makedirs(dirpath)
-        camera.start_recording(path_to_file)
-        camera.wait_recording(time)
-        camera.stop_recording()
-        return
+def rec(time, path_to_file):
+    global camera
+    dirpath = path_to_file.split('/')[:-1]
+    dirpath = '/'.join(dirpath)
+    if not os.path.exists(dirpath):
+        os.makedirs(dirpath)
+    camera.start_recording(path_to_file)
+    camera.wait_recording(time)
+    camera.stop_recording()

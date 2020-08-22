@@ -75,11 +75,14 @@ def add_tissues(li_of_post_info, experiment_num_passed, bio_reactor_num_passed, 
 @app.route('/', methods=['GET', 'POST'])
 def index_post():
     try:
+        print('tried')
         form = forms.upload_to_b_form()
         form.bio_reactor.choices = models.get_bio_choices()
+        print('got bios')
     except:
         return render_template('whatsTheIp.html')
     if request.method == 'POST':
+        print('posted')
         # TODO: add form validation
         '''
         is a list of info about tissue 'empty' if string not in use
@@ -108,19 +111,25 @@ def index_post():
                    str(form.frequency.data) + "_" + "Bio" + \
                    str(bio_reactor_num) + ".h264"
         path_to_file = f'static/uploads/{experiment_num}/{date_string}/videoFiles/{vid_name}'
+
+        def record_and_send():
+            print('rec')
+            cams.rec(int(form.vid_length.data), path_to_file)
+            os.system(f'rsync -av --ignore-existing static/uploads/ {ip_of_host}:~/uploader/')
+            print('thread_done')
+
+        recording = threading.Thread(target=record_and_send)
+        recording.start()
+
         new_video_id = models.insert_video(
             form.date_recorded.data, experiment_num, bio_reactor_id, form.frequency.data, path_to_file, bio_reactor_num)
-        Camera.rec(form.vid_length.data, path_to_file)
-        fold_path = f'{experiment_num}/{date_string}/videoFiles'
-
-        os.system(f'ssh root@{ip_of_host} "mkdir -p ~/uploader/{fold_path}"')
-        os.system(
-            f'scp static/uploads/{fold_path}/{vid_name} root@{ip_of_host}:~/uploader/{fold_path}/{vid_name}')
 
         # add the tissues to the databse as children of the vid, experiment and bio reactor
         add_tissues(li_of_post_info, experiment_num,
                     bio_reactor_num, new_video_id)
-        return ''' <h1>check database</h1> '''
+        recording.join()
+        print('main done')
+        return ''' <h1>Recording</h1> '''
     else:
         return render_template("index.html", form=form, ip=ip_of_host, freq=freq)
 
@@ -180,12 +189,14 @@ def focus_down():
 
 @app.route('/lighton', methods=['POST'])
 def light_on():
+    print('light')
     motor.light(True)
     return jsonify({'status': 'OK'})
 
 
 @app.route('/lightoff', methods=['POST'])
 def light_off():
+    print('loff')
     motor.light(False)
     return jsonify({'status': 'OK'})
 
@@ -213,6 +224,7 @@ def pulser_end():
 def shut_down():
     pulser_end()
     motor.cleanup()
+    print('about to join')
     request.environ.get('werkzeug.server.shutdown')()
     return 'Server shutting down...'
 
