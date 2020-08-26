@@ -110,12 +110,12 @@ def index_post():
         vid_name = date_string + "_" + "Freq" + \
                    str(form.frequency.data) + "_" + "Bio" + \
                    str(bio_reactor_num) + ".h264"
-        path_to_file = f'static/uploads/{experiment_num}/{date_string}/videoFiles/{vid_name}'
+        path_to_file = f'/root/Multi_Tissue_Recording/flask/static/uploads/{experiment_num}/{date_string}/videoFiles/{vid_name}'
 
         def record_and_send():
             print('rec')
             cams.rec(int(form.vid_length.data), path_to_file)
-            os.system(f'rsync -av --ignore-existing static/uploads/ {ip_of_host}:~/uploader/')
+            os.system(f'rsync -av --ignore-existing /root/Multi_Tissue_Recording/flask/static/uploads/ {ip_of_host}:~/uploader/')
             print('thread_done')
 
         recording = threading.Thread(target=record_and_send)
