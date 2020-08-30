@@ -111,6 +111,7 @@ def index_post():
                    str(form.frequency.data) + "_" + "Bio" + \
                    str(bio_reactor_num) + ".h264"
         path_to_file = f'/root/Multi_Tissue_Recording/flask/static/uploads/{experiment_num}/{date_string}/videoFiles/{vid_name}'
+        short_path_to_file=f'static/uploads/{experiment_num}/{date_string}/videoFiles/{vid_name}' 
 
         def record_and_send():
             print('rec')
@@ -122,7 +123,7 @@ def index_post():
         recording.start()
 
         new_video_id = models.insert_video(
-            form.date_recorded.data, experiment_num, bio_reactor_id, form.frequency.data, path_to_file, bio_reactor_num)
+            form.date_recorded.data, experiment_num, bio_reactor_id, form.frequency.data, short_path_to_file, bio_reactor_num)
 
         # add the tissues to the databse as children of the vid, experiment and bio reactor
         add_tissues(li_of_post_info, experiment_num,
