@@ -1,4 +1,4 @@
-cffi==1.14.3
+cffi==1.14.4
 click==7.1.2
 cryptography==3.2.1
 flask-sqlalchemy==2.4.4
